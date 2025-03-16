@@ -20,7 +20,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		name, args := parse(input)
+		name, args := nameAndArgs(input)
 
 		switch name {
 		case "exit":

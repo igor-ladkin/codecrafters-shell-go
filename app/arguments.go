@@ -6,30 +6,25 @@ import (
 	"unicode"
 )
 
-func parse(input string) (string, []string) {
+func nameAndArgs(input string) (string, []string) {
 	var name string
 	var args []string
 
-	parts := strings.SplitAfterN(strings.TrimSpace(input), " ", 2)
-
-	if len(parts) == 0 {
+	if len(input) == 0 {
 		panic("No command provided")
 	}
 
-	if len(parts) > 1 {
-		args = parseArgs(parts[1])
-	}
+	parts := split(input)
 
-	name = parseName(parts[0])
+	name = parts[0]
+	if len(parts) > 1 {
+		args = parts[1:]
+	}
 
 	return name, args
 }
 
-func parseName(str string) string {
-	return strings.TrimSpace(str)
-}
-
-func parseArgs(input string) []string {
+func split(input string) []string {
 	var args []string
 	var currentArg strings.Builder
 
