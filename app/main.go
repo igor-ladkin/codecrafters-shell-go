@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -79,6 +80,18 @@ func cd(args []string) {
 	}
 
 	path := args[0]
+
+	if strings.HasPrefix(path, "~") {
+		path = strings.TrimPrefix(path, "~")
+
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			fmt.Println("cd: error getting home directory:", err)
+			return
+		}
+
+		path = filepath.Join(homeDir, path)
+	}
 
 	if err := os.Chdir(path); err != nil {
 		fmt.Println("cd: " + path + ": No such file or directory")
