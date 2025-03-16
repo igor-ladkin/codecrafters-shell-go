@@ -20,4 +20,6 @@ func main() {
 	}
 
 	fmt.Println(command[:len(command)-1] + ": command not found")
+
+	main()
 }
