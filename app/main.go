@@ -23,7 +23,7 @@ func isExecutable(name string) (string, bool) {
 	return path, err == nil
 }
 
-func handleExit(args []string) {
+func exit(args []string) {
 	code, err := strconv.Atoi(args[0])
 
 	if err != nil {
@@ -37,11 +37,11 @@ func handleExit(args []string) {
 	os.Exit(code)
 }
 
-func handleEcho(args []string) {
+func echo(args []string) {
 	fmt.Println(strings.Join(args, " "))
 }
 
-func handleType(args []string) {
+func _type(args []string) {
 	if len(args) == 0 {
 		panic("No command provided")
 	}
@@ -61,7 +61,7 @@ func handleType(args []string) {
 	fmt.Println(name + ": not found")
 }
 
-func handlePwd(_ []string) {
+func pwd(_ []string) {
 	dir, err := os.Getwd()
 
 	if err != nil {
@@ -72,7 +72,7 @@ func handlePwd(_ []string) {
 	fmt.Println(dir)
 }
 
-func handleCd(args []string) {
+func cd(args []string) {
 	if len(args) == 0 {
 		fmt.Println("cd: no argument provided")
 		return
@@ -86,62 +86,58 @@ func handleCd(args []string) {
 	}
 }
 
-func handleBuiltin(name string, args []string) {
+func executeBuiltin(name string, args []string) {
 	switch name {
 	case "exit":
-		handleExit(args)
+		exit(args)
 	case "echo":
-		handleEcho(args)
+		echo(args)
 	case "type":
-		handleType(args)
+		_type(args)
 	case "pwd":
-		handlePwd(args)
+		pwd(args)
 	case "cd":
-		handleCd(args)
+		cd(args)
 	}
 }
 
-func handleExecutable(name string, args []string) error {
+func executeExternal(name string, args []string) error {
+	if _, ok := isExecutable(name); !ok {
+		fmt.Println(name + ": command not found")
+		return nil
+	}
+
 	cmd := exec.Command(name, args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+
 	return cmd.Run()
-}
-
-func handleCommand(command string) {
-	parts := strings.Fields(strings.TrimSpace(command))
-
-	if len(parts) == 0 {
-		panic("No command provided")
-	}
-
-	name, args := parts[0], parts[1:]
-
-	if isBuiltin(name) {
-		handleBuiltin(name, args)
-		return
-	}
-
-	if _, ok := isExecutable(name); ok {
-		handleExecutable(name, args)
-		return
-	}
-
-	fmt.Println(name + ": command not found")
 }
 
 func main() {
 	fmt.Fprint(os.Stdout, "$ ")
 
-	command, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	input, err := bufio.NewReader(os.Stdin).ReadString('\n')
 
 	if err != nil {
 		fmt.Println("Error reading input:", err)
 		os.Exit(1)
 	}
 
-	handleCommand(command)
+	command := strings.Fields(strings.TrimSpace(input))
+
+	if len(command) == 0 {
+		panic("No command provided")
+	}
+
+	name, args := command[0], command[1:]
+
+	if isBuiltin(name) {
+		executeBuiltin(name, args)
+	} else {
+		executeExternal(name, args)
+	}
 
 	main()
 }
