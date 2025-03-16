@@ -43,7 +43,7 @@ func parseArgs(input string) []string {
 	for scanner.Scan() {
 		char := scanner.Text()[0]
 
-		if char == '\\' && !isEscaped && !isSingleQuoted && !isDoubleQuoted {
+		if char == '\\' && !isEscaped {
 			isEscaped = true
 			continue
 		}
@@ -65,6 +65,26 @@ func parseArgs(input string) []string {
 			continue
 		}
 
+		if char == '\\' && isEscaped && (isSingleQuoted || isDoubleQuoted) {
+			isEscaped = false
+			currentArg.WriteByte(char)
+			continue
+		}
+
+		if char == '"' && isEscaped && isSingleQuoted {
+			isEscaped = false
+			currentArg.WriteByte('\\')
+			currentArg.WriteByte(char)
+			continue
+		}
+
+		if char == '\'' && isEscaped && isDoubleQuoted {
+			isEscaped = false
+			currentArg.WriteByte('\\')
+			currentArg.WriteByte(char)
+			continue
+		}
+
 		if char == ' ' && isEscaped {
 			isEscaped = false
 			currentArg.WriteByte(char)
@@ -79,6 +99,19 @@ func parseArgs(input string) []string {
 
 		if char == '"' && isEscaped {
 			isEscaped = false
+			currentArg.WriteByte(char)
+			continue
+		}
+
+		if isEscaped && !isSingleQuoted && !isDoubleQuoted {
+			isEscaped = false
+			currentArg.WriteByte(char)
+			continue
+		}
+
+		if isEscaped {
+			isEscaped = false
+			currentArg.WriteByte('\\')
 			currentArg.WriteByte(char)
 			continue
 		}
