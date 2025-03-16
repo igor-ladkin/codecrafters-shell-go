@@ -13,7 +13,15 @@ import (
 // Ensures gofmt doesn't remove the "fmt" import in stage 1 (feel free to remove this!)
 var _ = fmt.Fprint
 
-var builtins = []string{"exit", "echo", "type"}
+func isBuiltin(name string) bool {
+	builtins := []string{"exit", "echo", "type"}
+	return slices.Contains(builtins, name)
+}
+
+func isExecutable(name string) (string, bool) {
+	path, err := exec.LookPath(name)
+	return path, err == nil
+}
 
 func handleExit(args []string) {
 	code, err := strconv.Atoi(args[0])
@@ -40,17 +48,36 @@ func handleType(args []string) {
 
 	name := args[0]
 
-	if slices.Contains(builtins, name) {
+	if isBuiltin(name) {
 		fmt.Println(name, "is a shell builtin")
 		return
 	}
 
-	if path, err := exec.LookPath(name); err == nil {
+	if path, ok := isExecutable(name); ok {
 		fmt.Println(name, "is", path)
 		return
 	}
 
 	fmt.Println(name + ": not found")
+}
+
+func handleBuiltin(name string, args []string) {
+	switch name {
+	case "exit":
+		handleExit(args)
+	case "echo":
+		handleEcho(args)
+	case "type":
+		handleType(args)
+	}
+}
+
+func handleExecutable(name string, args []string) error {
+	cmd := exec.Command(name, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 func handleCommand(command string) {
@@ -62,16 +89,17 @@ func handleCommand(command string) {
 
 	name, args := parts[0], parts[1:]
 
-	switch name {
-	case "exit":
-		handleExit(args)
-	case "echo":
-		handleEcho(args)
-	case "type":
-		handleType(args)
-	default:
-		fmt.Println(name + ": command not found")
+	if isBuiltin(name) {
+		handleBuiltin(name, args)
+		return
 	}
+
+	if _, ok := isExecutable(name); ok {
+		handleExecutable(name, args)
+		return
+	}
+
+	fmt.Println(name + ": command not found")
 }
 
 func main() {
