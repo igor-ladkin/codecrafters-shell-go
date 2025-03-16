@@ -14,7 +14,7 @@ import (
 var _ = fmt.Fprint
 
 func isBuiltin(name string) bool {
-	builtins := []string{"exit", "echo", "type", "pwd"}
+	builtins := []string{"exit", "echo", "type", "pwd", "cd"}
 	return slices.Contains(builtins, name)
 }
 
@@ -72,6 +72,20 @@ func handlePwd(_ []string) {
 	fmt.Println(dir)
 }
 
+func handleCd(args []string) {
+	if len(args) == 0 {
+		fmt.Println("cd: no argument provided")
+		return
+	}
+
+	path := args[0]
+
+	if err := os.Chdir(path); err != nil {
+		fmt.Println("cd: " + path + ": No such file or directory")
+		return
+	}
+}
+
 func handleBuiltin(name string, args []string) {
 	switch name {
 	case "exit":
@@ -82,6 +96,8 @@ func handleBuiltin(name string, args []string) {
 		handleType(args)
 	case "pwd":
 		handlePwd(args)
+	case "cd":
+		handleCd(args)
 	}
 }
 
