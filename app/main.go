@@ -12,7 +12,16 @@ import (
 var _ = fmt.Fprint
 
 func handleExit(args []string) {
-	code, _ := strconv.Atoi(args[0])
+	code, err := strconv.Atoi(args[0])
+
+	if err != nil {
+		panic("Invalid exit code")
+	}
+
+	if code < 0 || code > 255 {
+		panic("Invalid exit code")
+	}
+
 	os.Exit(code)
 }
 
