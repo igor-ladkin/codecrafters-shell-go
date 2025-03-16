@@ -14,7 +14,7 @@ import (
 var _ = fmt.Fprint
 
 func isBuiltin(name string) bool {
-	builtins := []string{"exit", "echo", "type"}
+	builtins := []string{"exit", "echo", "type", "pwd"}
 	return slices.Contains(builtins, name)
 }
 
@@ -61,6 +61,17 @@ func handleType(args []string) {
 	fmt.Println(name + ": not found")
 }
 
+func handlePwd(_ []string) {
+	dir, err := os.Getwd()
+
+	if err != nil {
+		fmt.Println("pwd: error getting current directory:", err)
+		return
+	}
+
+	fmt.Println(dir)
+}
+
 func handleBuiltin(name string, args []string) {
 	switch name {
 	case "exit":
@@ -69,6 +80,8 @@ func handleBuiltin(name string, args []string) {
 		handleEcho(args)
 	case "type":
 		handleType(args)
+	case "pwd":
+		handlePwd(args)
 	}
 }
 
