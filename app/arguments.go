@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"strings"
-	"unicode"
 )
 
 func nameAndArgs(input string) (string, []string) {
@@ -38,88 +37,34 @@ func split(input string) []string {
 	for scanner.Scan() {
 		char := scanner.Text()[0]
 
-		if char == '\\' && !isEscaped {
+		switch {
+		case isEscaped:
+			isEscaped = false
+
+			if isSingleQuoted || isDoubleQuoted {
+				if char == ' ' ||
+					(char == '"' && isSingleQuoted) ||
+					(char == '\'' && isDoubleQuoted) ||
+					(char != '\\' && char != '\'' && char != '"') {
+					currentArg.WriteByte('\\')
+				}
+			}
+
+			currentArg.WriteByte(char)
+		case char == '\\':
 			isEscaped = true
-			continue
-		}
-
-		if char == '"' && !isEscaped && !isSingleQuoted {
+		case char == '"' && !isSingleQuoted:
 			isDoubleQuoted = !isDoubleQuoted
-			continue
-		}
-
-		if char == '\'' && !isEscaped && !isDoubleQuoted {
+		case char == '\'' && !isDoubleQuoted:
 			isSingleQuoted = !isSingleQuoted
-			continue
-		}
-
-		if char == ' ' && isEscaped && (isSingleQuoted || isDoubleQuoted) {
-			isEscaped = false
-			currentArg.WriteByte('\\')
-			currentArg.WriteByte(char)
-			continue
-		}
-
-		if char == '\\' && isEscaped && (isSingleQuoted || isDoubleQuoted) {
-			isEscaped = false
-			currentArg.WriteByte(char)
-			continue
-		}
-
-		if char == '"' && isEscaped && isSingleQuoted {
-			isEscaped = false
-			currentArg.WriteByte('\\')
-			currentArg.WriteByte(char)
-			continue
-		}
-
-		if char == '\'' && isEscaped && isDoubleQuoted {
-			isEscaped = false
-			currentArg.WriteByte('\\')
-			currentArg.WriteByte(char)
-			continue
-		}
-
-		if char == ' ' && isEscaped {
-			isEscaped = false
-			currentArg.WriteByte(char)
-			continue
-		}
-
-		if char == '\'' && isEscaped {
-			isEscaped = false
-			currentArg.WriteByte(char)
-			continue
-		}
-
-		if char == '"' && isEscaped {
-			isEscaped = false
-			currentArg.WriteByte(char)
-			continue
-		}
-
-		if isEscaped && !isSingleQuoted && !isDoubleQuoted {
-			isEscaped = false
-			currentArg.WriteByte(char)
-			continue
-		}
-
-		if isEscaped {
-			isEscaped = false
-			currentArg.WriteByte('\\')
-			currentArg.WriteByte(char)
-			continue
-		}
-
-		if unicode.IsSpace(rune(char)) && !isSingleQuoted && !isDoubleQuoted && !isEscaped {
+		case char == ' ' && !isSingleQuoted && !isDoubleQuoted:
 			if currentArg.Len() > 0 {
 				args = append(args, currentArg.String())
 				currentArg.Reset()
 			}
-			continue
+		default:
+			currentArg.WriteByte(char)
 		}
-
-		currentArg.WriteByte(char)
 	}
 
 	if currentArg.Len() > 0 {
