@@ -36,20 +36,29 @@ func parseArgs(input string) []string {
 	scanner := bufio.NewScanner(strings.NewReader(input))
 	scanner.Split(bufio.ScanRunes)
 
-	isQuoted := false
+	isDoubleQuoted := false
+	isSingleQuoted := false
+	isEscaped := false
 
 	for scanner.Scan() {
 		char := scanner.Text()[0]
-		if char == '\'' {
-			if isQuoted {
-				isQuoted = false
-			} else {
-				isQuoted = true
-			}
+
+		if char == '"' {
+			isDoubleQuoted = !isDoubleQuoted
 			continue
 		}
 
-		if unicode.IsSpace(rune(char)) && !isQuoted {
+		if char == '\'' && !isDoubleQuoted {
+			isSingleQuoted = !isSingleQuoted
+			continue
+		}
+
+		if char == '\\' && isDoubleQuoted {
+			isEscaped = !isEscaped
+			continue
+		}
+
+		if unicode.IsSpace(rune(char)) && !isSingleQuoted && !isDoubleQuoted && !isEscaped {
 			if currentArg.Len() > 0 {
 				args = append(args, currentArg.String())
 				currentArg.Reset()
