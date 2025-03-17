@@ -10,12 +10,12 @@ func Exit(args []string) {
 	code, err := strconv.Atoi(args[0])
 
 	if err != nil {
-		fmt.Println("exit: Invalid exit code")
+		fmt.Println("exit: invalid exit code")
 		return
 	}
 
 	if code < 0 || code > 255 {
-		fmt.Println("exit: Invalid exit code")
+		fmt.Println("exit: invalid exit code")
 		return
 	}
 

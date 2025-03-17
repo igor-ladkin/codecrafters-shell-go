@@ -8,7 +8,7 @@ import (
 
 func Exec(name string, args []string) error {
 	if _, err := exec.LookPath(name); err != nil {
-		fmt.Println(name + ": command not found")
+		fmt.Println("exec: " + name + ": command not found")
 		return nil
 	}
 

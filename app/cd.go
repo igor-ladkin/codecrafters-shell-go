@@ -20,7 +20,7 @@ func Cd(args []string) {
 
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Println("cd: error getting home directory:", err)
+			fmt.Println("cd: error getting home directory")
 			return
 		}
 
@@ -28,7 +28,7 @@ func Cd(args []string) {
 	}
 
 	if err := os.Chdir(path); err != nil {
-		fmt.Println("cd: " + path + ": No such file or directory")
+		fmt.Println("cd: " + path + ": no such file or directory")
 		return
 	}
 }

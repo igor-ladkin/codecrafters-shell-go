@@ -6,9 +6,6 @@ import (
 	"os"
 )
 
-// Ensures gofmt doesn't remove the "fmt" import in stage 1 (feel free to remove this!)
-var _ = fmt.Fprint
-
 func main() {
 	for {
 		fmt.Fprint(os.Stdout, "$ ")
@@ -16,7 +13,7 @@ func main() {
 		input, err := bufio.NewReader(os.Stdin).ReadString('\n')
 
 		if err != nil {
-			fmt.Println("Error reading input:", err)
+			fmt.Println("main: error reading input")
 			os.Exit(1)
 		}
 
