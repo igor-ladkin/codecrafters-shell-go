@@ -28,7 +28,7 @@ func Cd(args []string, io IO) {
 	}
 
 	if err := os.Chdir(path); err != nil {
-		fmt.Fprintln(io.Error, "cd: "+path+": no such file or directory")
+		fmt.Fprintln(io.Error, "cd: "+path+": No such file or directory")
 		return
 	}
 }
