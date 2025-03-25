@@ -21,13 +21,33 @@ func NewIO(input io.Reader, output io.Writer, error io.Writer) IO {
 	}
 }
 
+func NewIOfromRedirect(kind string, path string) IO {
+	file, err := os.Create(path)
+
+	if err != nil {
+		panic(err)
+	}
+
+	switch kind {
+	case ">":
+		return NewIO(os.Stdin, file, os.Stderr)
+	case "1>":
+		return NewIO(os.Stdin, file, os.Stderr)
+	case "2>":
+		return NewIO(os.Stdin, os.Stdout, file)
+	default:
+		panic("Invalid redirect kind: " + kind)
+	}
+}
+
 func DefaultIO() IO {
 	return NewIO(os.Stdin, os.Stdout, os.Stderr)
 }
 
-func nameAndArgs(input string) (string, []string, IO) {
+func parseArguments(input string) (string, []string, IO) {
 	var name string
 	var args []string
+	var io IO
 
 	if len(input) == 0 {
 		panic("No command provided")
@@ -35,14 +55,27 @@ func nameAndArgs(input string) (string, []string, IO) {
 
 	parts := split(input)
 
-	name = parts[0]
-	io := DefaultIO()
+	name, parts = parts[0], parts[1:]
 
-	if len(parts) > 1 {
-		args = parts[1:]
+	if index, ok := hasRedirect(parts); ok {
+		args = parts[:index]
+		io = NewIOfromRedirect(parts[index], parts[index+1])
+	} else {
+		args = parts
+		io = DefaultIO()
 	}
 
 	return name, args, io
+}
+
+func hasRedirect(parts []string) (int, bool) {
+	for i, part := range parts {
+		if part == "1>" || part == "2>" || part == ">" {
+			return i, true
+		}
+	}
+
+	return -1, false
 }
 
 func split(input string) []string {
