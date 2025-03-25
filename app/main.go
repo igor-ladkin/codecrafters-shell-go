@@ -17,21 +17,21 @@ func main() {
 			os.Exit(1)
 		}
 
-		name, args := nameAndArgs(input)
+		name, args, io := nameAndArgs(input)
 
 		switch name {
 		case "exit":
-			Exit(args)
+			Exit(args, io)
 		case "echo":
-			Echo(args)
+			Echo(args, io)
 		case "type":
-			Type(args)
+			Type(args, io)
 		case "pwd":
-			Pwd(args)
+			Pwd(args, io)
 		case "cd":
-			Cd(args)
+			Cd(args, io)
 		default:
-			Exec(name, args)
+			Exec(name, args, io)
 		}
 	}
 }

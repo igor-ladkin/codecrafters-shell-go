@@ -5,6 +5,6 @@ import (
 	"strings"
 )
 
-func Echo(args []string) {
-	fmt.Println(strings.Join(args, " "))
+func Echo(args []string, io IO) {
+	fmt.Fprintln(io.Output, strings.Join(args, " "))
 }

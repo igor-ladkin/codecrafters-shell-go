@@ -2,20 +2,19 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 )
 
-func Exec(name string, args []string) error {
+func Exec(name string, args []string, io IO) error {
 	if _, err := exec.LookPath(name); err != nil {
-		fmt.Println("exec: " + name + ": command not found")
+		fmt.Fprintln(io.Error, "exec: "+name+": command not found")
 		return nil
 	}
 
 	cmd := exec.Command(name, args...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdin = io.Input
+	cmd.Stdout = io.Output
+	cmd.Stderr = io.Error
 
 	return cmd.Run()
 }

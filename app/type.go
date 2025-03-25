@@ -23,23 +23,23 @@ func isExecutable(name string) (string, bool) {
 	return path, err == nil
 }
 
-func Type(args []string) {
+func Type(args []string, io IO) {
 	if len(args) == 0 {
-		fmt.Println("type: no command provided")
+		fmt.Fprintln(io.Error, "type: no command provided")
 		return
 	}
 
 	name := args[0]
 
 	if isBuiltin(name) {
-		fmt.Println(name, "is a shell builtin")
+		fmt.Fprintln(io.Output, name, "is a shell builtin")
 		return
 	}
 
 	if path, ok := isExecutable(name); ok {
-		fmt.Println(name, "is", path)
+		fmt.Fprintln(io.Output, name, "is", path)
 		return
 	}
 
-	fmt.Println(name + ": not found")
+	fmt.Fprintln(io.Error, name+": not found")
 }

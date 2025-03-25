@@ -6,16 +6,16 @@ import (
 	"strconv"
 )
 
-func Exit(args []string) {
+func Exit(args []string, io IO) {
 	code, err := strconv.Atoi(args[0])
 
 	if err != nil {
-		fmt.Println("exit: invalid exit code")
+		fmt.Fprintln(io.Error, "exit: invalid exit code")
 		return
 	}
 
 	if code < 0 || code > 255 {
-		fmt.Println("exit: invalid exit code")
+		fmt.Fprintln(io.Error, "exit: invalid exit code")
 		return
 	}
 

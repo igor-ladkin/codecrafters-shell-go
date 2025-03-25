@@ -2,10 +2,30 @@ package main
 
 import (
 	"bufio"
+	"io"
+	"os"
 	"strings"
 )
 
-func nameAndArgs(input string) (string, []string) {
+type IO struct {
+	Input  io.Reader
+	Output io.Writer
+	Error  io.Writer
+}
+
+func NewIO(input io.Reader, output io.Writer, error io.Writer) IO {
+	return IO{
+		Input:  input,
+		Output: output,
+		Error:  error,
+	}
+}
+
+func DefaultIO() IO {
+	return NewIO(os.Stdin, os.Stdout, os.Stderr)
+}
+
+func nameAndArgs(input string) (string, []string, IO) {
 	var name string
 	var args []string
 
@@ -16,11 +36,13 @@ func nameAndArgs(input string) (string, []string) {
 	parts := split(input)
 
 	name = parts[0]
+	io := DefaultIO()
+
 	if len(parts) > 1 {
 		args = parts[1:]
 	}
 
-	return name, args
+	return name, args, io
 }
 
 func split(input string) []string {

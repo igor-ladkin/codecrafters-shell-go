@@ -5,13 +5,13 @@ import (
 	"os"
 )
 
-func Pwd(_ []string) {
+func Pwd(_ []string, io IO) {
 	dir, err := os.Getwd()
 
 	if err != nil {
-		fmt.Println("pwd: error getting current directory")
+		fmt.Fprintln(io.Error, "pwd: error getting current directory")
 		return
 	}
 
-	fmt.Println(dir)
+	fmt.Fprintln(io.Output, dir)
 }

@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-func Cd(args []string) {
+func Cd(args []string, io IO) {
 	if len(args) == 0 {
-		fmt.Println("cd: no argument provided")
+		fmt.Fprintln(io.Error, "cd: no argument provided")
 		return
 	}
 
@@ -20,7 +20,7 @@ func Cd(args []string) {
 
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Println("cd: error getting home directory")
+			fmt.Fprintln(io.Error, "cd: error getting home directory")
 			return
 		}
 
@@ -28,7 +28,7 @@ func Cd(args []string) {
 	}
 
 	if err := os.Chdir(path); err != nil {
-		fmt.Println("cd: " + path + ": no such file or directory")
+		fmt.Fprintln(io.Error, "cd: "+path+": no such file or directory")
 		return
 	}
 }
