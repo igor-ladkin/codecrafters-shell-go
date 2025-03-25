@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -22,18 +23,22 @@ func NewIO(input io.Reader, output io.Writer, error io.Writer) IO {
 }
 
 func NewIOfromRedirect(kind string, path string) IO {
-	file, err := os.Create(path)
+	flag := os.O_CREATE | os.O_WRONLY
+
+	if strings.HasSuffix(kind, ">>") {
+		flag |= os.O_APPEND
+	}
+
+	file, err := os.OpenFile(path, flag, 0644)
 
 	if err != nil {
 		panic(err)
 	}
 
 	switch kind {
-	case ">":
+	case ">", "1>", ">>", "1>>":
 		return NewIO(os.Stdin, file, os.Stderr)
-	case "1>":
-		return NewIO(os.Stdin, file, os.Stderr)
-	case "2>":
+	case "2>", "2>>":
 		return NewIO(os.Stdin, os.Stdout, file)
 	default:
 		panic("Invalid redirect kind: " + kind)
@@ -69,8 +74,10 @@ func parseArguments(input string) (string, []string, IO) {
 }
 
 func hasRedirect(parts []string) (int, bool) {
+	redirects := []string{"1>", "2>", ">", "1>>", "2>>", ">>"}
+
 	for i, part := range parts {
-		if part == "1>" || part == "2>" || part == ">" {
+		if slices.Contains(redirects, part) {
 			return i, true
 		}
 	}
