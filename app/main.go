@@ -1,16 +1,23 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
+
+	"golang.org/x/term"
 )
 
 func main() {
-	for {
-		fmt.Fprint(os.Stdout, "$ ")
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		panic(err)
+	}
+	defer term.Restore(int(os.Stdin.Fd()), oldState)
 
-		input, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	terminal := setupTerminal()
+
+	for {
+		input, err := terminal.ReadLine()
 
 		if err != nil {
 			fmt.Println("main: error reading input")
