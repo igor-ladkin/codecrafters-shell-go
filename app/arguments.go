@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 )
@@ -27,6 +28,13 @@ func NewIOfromRedirect(kind string, path string) IO {
 
 	if strings.HasSuffix(kind, ">>") {
 		flag |= os.O_APPEND
+	}
+
+	dir := filepath.Dir(path)
+	if dir != "." {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			panic(err)
+		}
 	}
 
 	file, err := os.OpenFile(path, flag, 0644)
